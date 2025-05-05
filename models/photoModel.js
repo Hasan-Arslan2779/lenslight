@@ -1,0 +1,29 @@
+import mongoose from "mongoose";
+
+const photoSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  description: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+
+  uploadedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  url: {
+    type: String,
+    required: true,
+  },
+});
+
+export const Photo = mongoose.model("Photo", photoSchema);
