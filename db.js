@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.DB_URI, {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
       dbName: "lenslight",
       serverSelectionTimeoutMS: 5000, // 5 saniye
     });

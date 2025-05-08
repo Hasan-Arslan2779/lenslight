@@ -40,7 +40,15 @@ const createPhoto = async (req, res) => {
 
 const getAllPhotos = async (req, res) => {
   try {
-    const photos = await Photo.find({});
+    const photos = res.locals.user
+      ? await Photo.find({ user: { $ne: res.locals.user._id } })
+      : await Photo.find({});
+    if (!photos) {
+      return res.status(404).json({
+        message: "No photos found",
+      });
+    }
+    // Populate the user field with the User model
     res.status(200).render("photos", { photos, link: "photos" });
   } catch (error) {
     res.status(400).json({

@@ -2,6 +2,7 @@ import User from "../models/userModal.js";
 import { Photo } from "../models/photoModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 const createUsers = async (req, res) => {
   try {
     await User.create(req.body);
@@ -82,10 +83,19 @@ const createToken = (userId) => {
 
 const getAUser = async (req, res) => {
   try {
-    const photos = await Photo.find({ user: res.locals.user._id });
-    const user = await User.findById({ _id: req.params.id });
-    res.status(200).render("user", { user, photos, link: "users" });
+    const photos = await Photo.find({
+      user: new mongoose.Types.ObjectId(req.params.id),
+    });
+    const user = await User.findById({
+      _id: req.params.id,
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.render("user", { user, photos, link: "Users" });
   } catch (error) {
+    console.error("Error in getAUser:", error.message);
     res.status(400).json({
       message: error.message,
     });

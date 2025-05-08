@@ -3,25 +3,31 @@ import jwt from "jsonwebtoken";
 
 const checkUser = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt; // Doğru token'ı alın
+    const token = req.cookies.jwt;
     if (token) {
       jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err) {
-          console.log(err.message);
+          console.log("JWT Verify Error:", err.message);
           res.locals.user = null;
           next();
         } else {
           const user = await User.findById(decoded.userId);
-          res.locals.user = user; // Kullanıcıyı locals'a ayarlayın
+          if (!user) {
+            console.log("User not found for ID:", decoded.userId);
+            res.locals.user = null;
+          } else {
+            res.locals.user = user;
+          }
           next();
         }
       });
     } else {
+      console.log("No JWT Token found in cookies");
       res.locals.user = null;
       next();
     }
   } catch (error) {
-    console.error(error);
+    console.error("Error in checkUser middleware:", error.message);
     res.locals.user = null;
     next();
   }

@@ -10,7 +10,7 @@ router.route("/register").post(userController.createUsers);
 router.route("/login").post(userController.loginUser);
 router.route("/dashboard").get(authenticateToken, getDashboardPage);
 router.route("/logout").get(userController.logoutUser);
-router.route("/:id").get(userController.getAUser);
-router.route("/users").get(userController.getUsersPage);
+router.route("/:id").get(authenticateToken, userController.getAUser);
+router.route("/users").get(authenticateToken, userController.getUsersPage);
 
 export default router;

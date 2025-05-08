@@ -11,14 +11,13 @@ const photoSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-
   uploadedAt: {
     type: Date,
     default: Date.now,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "User", // Model adı büyük harfle yazılmalı
   },
   url: {
     type: String,

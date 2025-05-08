@@ -78,6 +78,27 @@
         </div>
       </div>
     </div>
+    <div class="tz-gallery">
+      <div class="row">
+        <% photos.forEach(photo => { %>
+        <div class="col-lg-4 col-md-6 ma_bottom30">
+          <div class="lightbox">
+            <img src="<%= photo.url %>" alt="Bridge" />
+            <div class="view_main">
+              <div class="pose">
+                <h3 style="padding-top: 10px; padding-bottom: 10px">
+                  <%= photo.name %>
+                </h3>
+                <p style="padding-top: 10px">
+                  <%= photo.description.substring(0,80) + "..." %>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
 
     <!-- end Dashboard -->
 
