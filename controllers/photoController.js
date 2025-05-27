@@ -24,6 +24,7 @@ const createPhoto = async (req, res) => {
       description,
       user: res.locals.user._id,
       url: result.secure_url,
+      image_id: result.public_id,
     });
 
     // Remove the temporary file
@@ -70,4 +71,54 @@ const getPhoto = async (req, res) => {
     });
   }
 };
-export { createPhoto, getAllPhotos, getPhoto };
+const deletePhoto = async (req, res) => {
+  try {
+    const photo = await Photo.findByIdAndDelete(req.params.id);
+    if (!photo) {
+      return res.status(404).json({
+        message: "Photo not found",
+      });
+    }
+    // Delete the image from Cloudinary
+    await cloudinary.uploader.destroy(photo.image_id);
+    res.status(200).redirect("/users/dashboard");
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+const updatePhoto = async (req, res) => {
+  try {
+    const photo = await Photo.findById(req.params.id);
+    if (!photo) {
+      return res.status(404).json({
+        message: "Photo not found",
+      });
+    }
+    if (req.files && req.files.image) {
+      const photooId = photo.image_id;
+      await cloudinary.uploader.destroy(photooId);
+      const result = await cloudinary.uploader.upload(
+        req.files.image.tempFilePath,
+        {
+          use_filename: true,
+          folder: "lenslight",
+        }
+      );
+      photo.url = result.secure_url;
+      photo.image_id = result.public_id;
+      fs.unlinkSync(req.files.image.tempFilePath);
+    }
+    photo.title = req.body.title || photo.title;
+    photo.description = req.body.description || photo.description;
+    photo.save();
+    res.status(200).redirect(`/photos/${req.params.id}`);
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+export { createPhoto, getAllPhotos, getPhoto, deletePhoto, updatePhoto };

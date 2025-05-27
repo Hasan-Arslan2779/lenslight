@@ -3,8 +3,10 @@ import {
   //   getPhotos,
   //   getPhoto,
   createPhoto,
+  deletePhoto,
   getAllPhotos,
   getPhoto,
+  updatePhoto,
   //   updatePhoto,
   //   deletePhoto,
 } from "../controllers/photoController.js";
@@ -17,4 +19,6 @@ router.route("/").post(createPhoto);
 router.route("/").get(getAllPhotos);
 
 router.route("/:id").get(getPhoto);
+router.route("/:id").delete(deletePhoto);
+router.route("/:id").put(updatePhoto);
 export default router;

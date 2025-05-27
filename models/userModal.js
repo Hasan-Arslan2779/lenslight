@@ -1,19 +1,20 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import validator from "validator";
+
 const userSchema = new mongoose.Schema(
   {
     userName: {
       type: String,
       required: [true, "Username is required"],
-      validator: [validator.isAlphanumeric, "Username must be alphanumeric"],
+      validate: [validator.isAlphanumeric, "Username must be alphanumeric"],
       minLength: [3, "Username must be at least 3 characters"],
     },
     email: {
       type: String,
       required: [true, "Email is required"],
       unique: true,
-      validator: [validator.isEmail, "Please enter a valid email"],
+      validate: [validator.isEmail, "Please enter a valid email"],
       lowercase: true,
     },
     password: {
@@ -29,11 +30,24 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    followings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
+
 userSchema.pre("save", async function (next) {
   const user = this;
   if (!user.isModified("password")) return next(); // Şifre zaten hashlenmişse tekrar hashleme

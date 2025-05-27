@@ -18,26 +18,5 @@ const getRegisterPage = (req, res) => {
 const getLoginPage = (req, res) => {
   res.render("login", { title: "Login", link: "login" });
 };
-const getDashboardPage = async (req, res) => {
-  const user = res.locals.user;
-  const photos = await Photo.find({ user: res.locals.user._id });
-  if (!user) {
-    return res.redirect("/login");
-  }
-  // res.locals.user = user; // Kullanıcıyı locals'a ayarlayın
 
-  res.render("dashboard", {
-    user: user,
-    title: "Dashboard",
-    link: "dashboard",
-    photos: photos,
-  });
-};
-
-export {
-  getIndexPage,
-  getAboutPage,
-  getRegisterPage,
-  getLoginPage,
-  getDashboardPage,
-};
+export { getIndexPage, getAboutPage, getRegisterPage, getLoginPage };

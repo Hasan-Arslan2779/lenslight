@@ -81,26 +81,7 @@ const createToken = (userId) => {
   });
 };
 
-const getAUser = async (req, res) => {
-  try {
-    const photos = await Photo.find({
-      user: new mongoose.Types.ObjectId(req.params.id),
-    });
-    const user = await User.findById({
-      _id: req.params.id,
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.render("user", { user, photos, link: "Users" });
-  } catch (error) {
-    console.error("Error in getAUser:", error.message);
-    res.status(400).json({
-      message: error.message,
-    });
-  }
-};
+// Kullanıcıların listelendiği sayfa
 const getUsersPage = async (req, res) => {
   try {
     const users = await User.find({ _id: { $ne: res.locals.user._id } }); // Veritabanından kullanıcıları al
@@ -110,6 +91,128 @@ const getUsersPage = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+// dsahboard sayfası
+const getDashboardPage = async (req, res) => {
+  try {
+    const photos = await Photo.find({ user: res.locals.user._id });
+    const user = await User.findById(res.locals.user._id).populate([
+      { path: "followings", select: "userName _id" },
+      { path: "followers", select: "userName _id" },
+    ]);
+
+    if (!user) {
+      return res.redirect("/login");
+    }
+
+    res.render("dashboard", {
+      user: user,
+      title: "Dashboard",
+      link: "dashboard",
+      photos: photos,
+    });
+  } catch (error) {
+    console.error("Error in getDashboardPage:", error.message);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+// Kullanıcı profili sayfası
+const getAUser = async (req, res) => {
+  try {
+    const photos = await Photo.find({
+      user: req.params.id,
+    });
+    const user = await User.findById({
+      _id: req.params.id,
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Kullanıcıyı kontrol et
+    const infollowers = user.followers.some(
+      (follower) => follower.toString() === res.locals.user._id.toString()
+    );
+
+    res.render("user", { user, infollowers, photos, link: "Users" });
+  } catch (error) {
+    console.error("Error in getAUser:", error.message);
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+// Takip etme işlemi
+const follow = async (req, res) => {
+  try {
+    let user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $push: { followers: res.locals.user._id } },
+      { new: true }
+    );
+
+    await User.findByIdAndUpdate(
+      res.locals.user._id,
+      { $push: { followings: req.params.id } },
+      { new: true }
+    );
+
+    // Fotoğrafları çek
+    const photos = await Photo.find({ user: user._id });
+
+    const infollowers = user.followers.some(
+      (follower) => follower.toString() === res.locals.user._id.toString()
+    );
+
+    res.status(200).redirect(`/users/${req.params.id}`, {
+      user,
+      infollowers,
+      photos,
+      title: "User",
+      link: "Users",
+    });
+  } catch (error) {
+    console.error("Error in follow function:", error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const unfollow = async (req, res) => {
+  try {
+    let user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $pull: { followers: res.locals.user._id } },
+      { new: true }
+    );
+
+    await User.findByIdAndUpdate(
+      res.locals.user._id,
+      { $pull: { followings: req.params.id } },
+      { new: true }
+    );
+
+    // Fotoğrafları çek
+    const photos = await Photo.find({ user: user._id });
+
+    const infollowers = user.followers.some(
+      (follower) => follower.toString() === res.locals.user._id.toString()
+    );
+
+    res.status(200).redirect(`/users/${req.params.id}`, {
+      user,
+      infollowers,
+      photos,
+      title: "User",
+      link: "Users",
+    });
+  } catch (error) {
+    console.error("Error in unfollow function:", error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
 export {
   createUsers,
   loginUser,
@@ -117,4 +220,7 @@ export {
   logoutUser,
   getAUser,
   getUsersPage,
+  getDashboardPage,
+  follow,
+  unfollow,
 };

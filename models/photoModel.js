@@ -23,6 +23,9 @@ const photoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  image_id: {
+    type: String,
+  },
 });
 
 export const Photo = mongoose.model("Photo", photoSchema);

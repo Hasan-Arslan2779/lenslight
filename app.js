@@ -6,6 +6,7 @@ import pageRoute from "./routes/pageRoute.js";
 import photoRoute from "./routes/photoRoute.js";
 import userRoute from "./routes/userRoute.js";
 import cookieParser from "cookie-parser";
+import methodOverride from "method-override";
 import { checkUser } from "./middlewares/authMiddleware.js";
 import { v2 as cloudinary } from "cloudinary";
 import fileUpload from "express-fileupload";
@@ -46,6 +47,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(fileUpload({ useTempFiles: true }));
+app.use(methodOverride("_method", { methods: ["POST", "GET"] }));
 
 // Routes
 app.use("*", checkUser); // Tüm sayfalarda kullanıcı kontrolü
@@ -56,7 +58,10 @@ app.get("/about", pageRoute);
 app.use("/photos", photoRoute);
 app.use("/users", userRoute);
 // app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+app.use((req, res, next) => {
+  console.log(`HTTP Method: ${req.method}, URL: ${req.url}`);
+  next();
+});
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
