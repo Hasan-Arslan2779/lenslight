@@ -90,12 +90,14 @@ const deletePhoto = async (req, res) => {
 };
 const updatePhoto = async (req, res) => {
   try {
+    // Kontrol et fotoğraf var mı
     const photo = await Photo.findById(req.params.id);
     if (!photo) {
       return res.status(404).json({
         message: "Photo not found",
       });
     }
+    //
     if (req.files && req.files.image) {
       const photooId = photo.image_id;
       await cloudinary.uploader.destroy(photooId);
